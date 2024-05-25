@@ -1,0 +1,6 @@
+Copyright (c) 2024 DocencIA
+
+Todos los derechos reservados.
+
+Este software y los materiales relacionados son propiedad exclusiva de DocencIA.
+Ninguna parte de este código puede ser copiada, reproducida, modificada, publicada, cargada, publicada, transmitida o distribuida de ninguna manera sin el permiso previo por escrito de DocencIA.
