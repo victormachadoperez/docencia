@@ -7,10 +7,7 @@
       }
   
       #uploadButton {
-        position: absolute;
-        top: 10%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        margin: 10px;
         padding: 10px 20px;
         border-radius: 25px;
         background-color: #4CAF50;
@@ -20,37 +17,27 @@
   
       #clearButton {
         left: 70%;
-        transform: translate(-70%, -50%);
       }
   
       body {
         cursor: default;
         user-select: none;
         height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 100%;
         padding: 0;
         margin: 0;
-        background-color: #f0f0f0;
+        background-color: rgb(133, 181, 209);
         overflow: hidden;
         font-family: Arial, sans-serif;
       }
   
       #fileContainer {
-        position: absolute;
-        top: 20%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         display: flex;
         flex-direction: column;
-        align-items: center;
       }
   
       .fileItem {
         margin: 10px;
-        display: flex;
-        justify-content: space-between;
         align-items: center;
         width: 100%;
       }
@@ -68,9 +55,10 @@
   </head>
 <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" onload="loadFiles();">
   <button id="uploadButton" onclick="document.getElementById('fileInput').click();">Seleccionar archivo</button>
-  <!--button id="clearButton" onclick="clearFiles();">Limpiar archivos</button-->
   <input type="file" id="fileInput" onchange="handleFileSelect(event);" />
   <div id="fileContainer"></div>
+  <input type="text" id="userInput" placeholder="Enter your message here">
+  <button onclick="sendMessage()">Send Message</button>
   <script>
     function handleFileSelect(evt) {
       var file = evt.target.files[0];
@@ -170,6 +158,34 @@
       sessionStorage.setItem('files', JSON.stringify(files));
       document.getElementById('fileContainer').innerHTML = '';
     }
+
+    async function callChatGPT(message) {
+      const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_OPEN_AI_KEY'
+        },
+        body: JSON.stringify({
+          prompt: message,
+          max_tokens: 60
+        })
+      });
+
+      const data = await response.json();
+      return data.choices[0].text.strip();
+    }
+
+    function sendMessage() {
+      const userInput = document.getElementById('userInput').value;
+      callChatGPT(userInput).then(response => {
+        const responseElement = document.createElement('p');
+        responseElement.textContent = response;
+        document.body.appendChild(responseElement);
+        console.log(response)
+      });
+    }
+
   </script>
 </body>
 </html>
