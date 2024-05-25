@@ -1,71 +1,74 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    #fileInput {
-      display: none;
-    }
+  <head>
+    <style>
+      #fileInput {
+        display: none;
+      }
+  
+      #uploadButton {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 10px 20px;
+        border-radius: 25px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+      }
+  
+      #clearButton {
+        left: 70%;
+        transform: translate(-70%, -50%);
+      }
+  
+      body {
+        cursor: default;
+        user-select: none;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+  
+      #fileContainer {
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+  
+      .fileItem {
+        margin: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+  
+      .fileItem img {
+        width: 50px;
+        height: 50px;
+      }
+  
+      .dragover {
+        background-color: #333;
+      }
 
-    #uploadButton, #clearButton {
-      position: absolute;
-      top: 10%;
-      padding: 10px 20px;
-      border-radius: 25px;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-    }
-
-    #uploadButton {
-      left: 30%;
-      transform: translate(-30%, -50%);
-    }
-
-    #clearButton {
-      left: 70%;
-      transform: translate(-70%, -50%);
-    }
-
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
-      margin: 0;
-      background-color: #f0f0f0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-    }
-
-    #fileContainer {
-      position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .fileItem {
-      margin: 10px;
-      text-align: center;
-    }
-
-    .fileItem img {
-      width: 50px;
-      height: 50px;
-    }
-
-    .dragover {
-      background-color: #333;
-    }
-  </style>
-</head>
+    </style>
+  </head>
 <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);" onload="loadFiles();">
   <button id="uploadButton" onclick="document.getElementById('fileInput').click();">Seleccionar archivo</button>
-  <button id="clearButton" onclick="clearFiles();">Limpiar archivos</button>
+  <!--button id="clearButton" onclick="clearFiles();">Limpiar archivos</button-->
   <input type="file" id="fileInput" onchange="handleFileSelect(event);" />
   <div id="fileContainer"></div>
   <script>
@@ -110,12 +113,32 @@
       document.body.classList.remove('dragover');
     }
 
-    function addFileToContainer(file) {
+    function addFileToContainer(file, index) {
       var container = document.getElementById('fileContainer');
       var fileItem = document.createElement('div');
       fileItem.classList.add('fileItem');
-      fileItem.innerHTML = '<img src="icono.png" alt="Icono de archivo" /><br />' + file.name; // Reemplaza "icono.png" con la ruta a tu icono
+
+      var fileName = document.createElement('span');
+      fileName.style.flexGrow = 1;
+      var name = file.name;
+      if (name.length > 64) {
+        var extension = name.slice((name.lastIndexOf(".") - 1 >>> 0) + 2);
+        name = name.slice(0, 60) + '...' + extension;
+      }
+      fileName.textContent = name;
+      fileName.title = file.name;
+      fileItem.appendChild(fileName);
+
+      var deleteButton = document.createElement('button');
+      deleteButton.textContent = 'X';
+      deleteButton.style.color = 'red';
+      deleteButton.onclick = function() {
+        removeFile(fileItem);
+      };
+
+      fileItem.appendChild(deleteButton);
       container.appendChild(fileItem);
+                          
     }
 
     function loadFiles() {
@@ -127,6 +150,24 @@
 
     function clearFiles() {
       sessionStorage.removeItem('files');
+      document.getElementById('fileContainer').innerHTML = '';
+    }
+
+    function removeFile(fileItem) {
+      var files = JSON.parse(sessionStorage.getItem('files') || '[]');
+      var index = Array.from(fileItem.parentNode.children).indexOf(fileItem);
+      files.splice(index, 1);
+      sessionStorage.setItem('files', JSON.stringify(files));
+      document.getElementById('fileContainer').innerHTML = '';
+      for (var i = 0; i < files.length; i++) {
+        addFileToContainer({ name: files[i].name }, i);
+      }
+    }
+
+    function removeAllFiles() {
+      var files = JSON.parse(sessionStorage.getItem('files') || '[]');
+      files = [];
+      sessionStorage.setItem('files', JSON.stringify(files));
       document.getElementById('fileContainer').innerHTML = '';
     }
   </script>
